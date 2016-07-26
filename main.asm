@@ -131,16 +131,19 @@ dec
 	;GOTO		Seguir			;Se continua con la interrupcion
 	MOVF		ducha,W			;Se pregunta si el valor de las decenas			;*
 	SUBWF		decenas,W		;mostradas	en el display es el mismo que 		;*
-	BTFSS		STATUS,Z		;el definido para la ducha, si es asi se 		;*
+	BTFSC		STATUS,Z		;el definido para la ducha, si es asi se 		;*
 	GOTO		MUEVE_BOTELLA_V	;pasa al siguiente estado						;*
+;	BSF			PORTC,1
 	MOVF		llenado,W		;Se pregunta si el valor de las decenas			;*
 	SUBWF		decenas,W		;mostradas	en el display es el mismo que 		;*
-	BTFSS		STATUS,Z		;el definido para el llenado si es asi se		;*
+	BTFSC		STATUS,Z		;el definido para el llenado si es asi se		;*
 	GOTO		MUEVE_BOTELLA_L		;pasa al siguiente estado						;*
+;	BSF			PORTC,3
 	MOVF		etiquetado,W	;Se pregunta si el valor de las decenas			;*
 	SUBWF		decenas,W		;mostradas	en el display es el mismo que 		;*
-	BTFSS		STATUS,Z		;el definido para el etiquetado si es asi se	;*
+	BTFSC		STATUS,Z		;el definido para el etiquetado si es asi se	;*
 	GOTO		MUEVE_BOTELLA_V ;vuelve al estado del inicio para tener un 		;*
+;	BSF			PORTC,1
 	GOTO		Seguir			;ciclo cerrado en caso de que no sea ninguno 	;*
 	
 UNIDADES
@@ -163,6 +166,12 @@ cont
  	MOVLW 		.100		
     MOVWF 		contador   		;Carga contador con 100
 
+Seguir   
+	BCF			INTCON,T0IF		;Repone flag del TMR0 
+	MOVLW 		~.39
+    MOVWF 		TMR0      		;Repone el TMR0 con ~.39
+ 	RETFIE						;Retorno de interrupción
+
 MUEVE_BOTELLA_V
 	MOVLW		b'00000000'
 	MOVWF		PORTC
@@ -173,14 +182,7 @@ MUEVE_BOTELLA_L
 	MOVLW		b'00000000'
 	MOVWF		PORTC
 	BSF			PORTC,3
-	
-Seguir   
-	BCF			INTCON,T0IF		;Repone flag del TMR0 
-	MOVLW 		~.39
-    MOVWF 		TMR0      		;Repone el TMR0 con ~.39
- 	RETFIE						;Retorno de interrupción
-
-
+	GOTO		Seguir
 MAIN
 ;-------------------------------PROGRAMA PRINCIPAL------------------------------;*
 	;SETEO DE PUERTOS 
